@@ -1,0 +1,33 @@
+workflows:
+  flutter-workflow:
+    name: Flutter Workflow
+    max_build_duration: 60
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+      vars:
+        BUILD_VERSION: 1.0.0
+        BUILD_NUMBER: 1
+    scripts:
+      - name: Install dependencies
+        script: |
+          flutter packages get
+      - name: Run tests
+        script: |
+          flutter test
+      - name: Build APK
+        script: |
+          flutter build apk --release
+      - name: Build IPA
+        script: |
+          if [ "$FCI_FLUTTER_CHANNEL" = "stable" ]; then
+            flutter build ios --release --no-codesign
+          fi
+    artifacts:
+      - build/**/outputs/**/*.apk
+      - build/ios/iphoneos/**/*.ipa
+    publishing:
+      email:
+        recipients:
+          - your-email@example.com
