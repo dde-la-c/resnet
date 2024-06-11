@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 /// [ApiService] es una clase que proporciona métodos estáticos para interactuar con una API backend.
 class ApiService {
   // URL base del servidor backend.
-  static const String baseUrl = 'http://192.168.79.14:3000';
+  static const String baseUrl = 'http://192.168.78.254:3000';
 
   /// Compara la contraseña del usuario con la almacenada en el servidor.
   ///
@@ -181,6 +181,24 @@ class ApiService {
       return data['activo'];
     } else {
       throw Exception('Error al obtener el estado del submenú');
+    }
+  }
+
+  /// Fetch data from the SQL Server API.
+  ///
+  /// Retorna:
+  /// - Una lista de mapas que representa las filas de datos.
+  ///
+  /// Lanza:
+  /// - [Exception] si hay un error en la consulta.
+  static Future<List<Map<String, dynamic>>> fetchData() async {
+    final response = await http.get(Uri.parse('$baseUrl/fetchData'));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return List<Map<String, dynamic>>.from(data);
+    } else {
+      throw Exception('Error al obtener los datos');
     }
   }
 }

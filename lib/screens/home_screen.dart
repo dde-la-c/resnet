@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:pruebaresnet/screens/excel_screen.dart';
 import '../service/api_service.dart';
 
-/// [HomeScreen] es la pantalla principal después de un inicio de sesión exitoso.
-/// Muestra opciones de menú que pueden estar activas o inactivas, y diferentes submenús.
 class HomeScreen extends StatefulWidget {
   final bool isAdmin;
 
-  /// Constructor de [HomeScreen] que acepta un parámetro [isAdmin] para determinar si el usuario es administrador.
   HomeScreen({required this.isAdmin});
 
   @override
@@ -14,7 +12,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Variables para almacenar los nombres y estados de los menús y submenús.
   String menuName1 = 'Loading...';
   String menuName2 = 'Loading...';
   bool isMenu1Active = false;
@@ -31,10 +28,8 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadMenuNamesAndStatus();
   }
 
-  /// Método para cargar los nombres y estados de los menús y submenús desde la API.
   Future<void> _loadMenuNamesAndStatus() async {
     try {
-      // Llamadas a la API para obtener los nombres y estados de los menús y submenús.
       String? name1 = await ApiService.getMenuName(1);
       String? name2 = await ApiService.getMenuName(2);
       bool active1 = await ApiService.isMenuActive(1);
@@ -45,7 +40,6 @@ class _HomeScreenState extends State<HomeScreen> {
       bool subActive1 = await ApiService.isSubmenuActive(1);
       bool subActive2 = await ApiService.isSubmenuActive(2);
 
-      // Actualizar el estado de la pantalla con los datos obtenidos.
       setState(() {
         menuName1 = name1 ?? 'No disponible';
         menuName2 = name2 ?? 'No disponible';
@@ -58,12 +52,20 @@ class _HomeScreenState extends State<HomeScreen> {
         isSubmenu2Active = subActive2;
       });
     } catch (e) {
-      // Manejar errores en caso de que las llamadas a la API fallen.
       setState(() {
         menuName1 = 'Error';
         menuName2 = 'Error';
       });
     }
+  }
+
+  void _navigateToDataTableScreen(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DataTableScreen(),
+      ),
+    );
   }
 
   @override
@@ -72,22 +74,14 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text('Home'),
         actions: [
-          // Menú desplegable en la AppBar
           PopupMenuButton<String>(
             onSelected: (String result) {
-              // Acciones a realizar según la opción seleccionada
               switch (result) {
-                case 'option1':
-                  print('$menuName1 seleccionada');
+                case 'subOption1':
+                  _navigateToDataTableScreen(context);
                   break;
-                case 'option2':
-                  print('$menuName2 seleccionada');
-                  break;
-                case 'adminOption':
-                  print('Opción de administrador seleccionada');
-                  break;
-                case 'logout':
-                  print('Cerrar sesión');
+                case 'subOption2':
+                  print('Subopción 2 seleccionada');
                   break;
               }
             },
@@ -100,12 +94,16 @@ class _HomeScreenState extends State<HomeScreen> {
               if (isMenu2Active)
                 PopupMenuItem<String>(
                   value: 'option2',
+                  child: Text(menuName2),
+                ),
+              if (widget.isAdmin)
+                PopupMenuItem<String>(
+                  value: 'admin',
                   child: PopupMenuButton<String>(
                     onSelected: (String subResult) {
-                      // Acciones a realizar según la subopción seleccionada
                       switch (subResult) {
                         case 'subOption1':
-                          print('Subopción 1 seleccionada');
+                          _navigateToDataTableScreen(context);
                           break;
                         case 'subOption2':
                           print('Subopción 2 seleccionada');
@@ -116,7 +114,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         <PopupMenuEntry<String>>[
                       if (isSubmenu1Active && isMenu2Active || widget.isAdmin)
                         PopupMenuItem<String>(
-                            value: 'subOption1', child: Text(submenuName1)),
+                          value: 'subOption1',
+                          child: Text(submenuName1),
+                        ),
                       if (isSubmenu2Active && isMenu2Active || widget.isAdmin)
                         PopupMenuItem<String>(
                           value: 'subOption2',
@@ -124,15 +124,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                     ],
                     child: ListTile(
-                      title: Text(menuName2),
+                      title: Text('admin'),
                       trailing: Icon(Icons.arrow_right),
                     ),
                   ),
-                ),
-              if (widget.isAdmin)
-                const PopupMenuItem<String>(
-                  value: 'adminOption',
-                  child: Text('Opción de administrador'),
                 ),
               const PopupMenuItem<String>(
                 value: 'logout',
