@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pruebaresnet/screens/excel_screen.dart';
 import 'package:pruebaresnet/screens/email_screen.dart';
+import 'package:pruebaresnet/screens/pdf_screen.dart';
 import '../service/api_service.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -78,6 +79,15 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _navigateToPdfScreen(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PdfExportScreen(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -91,7 +101,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   _navigateToDataTableScreen(context);
                   break;
                 case 'subOption2':
-                  print('Subopción 2 seleccionada');
+                  _navigateToEmailScreen(context);
+                  break;
+                case 'subOption3':
+                  _navigateToPdfScreen(context);
                   break;
               }
             },
@@ -118,6 +131,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         case 'subOption2':
                           _navigateToEmailScreen(context);
                           break;
+                        case 'subOption3':
+                          _navigateToPdfScreen(context);
+                          break;
                       }
                     },
                     itemBuilder: (BuildContext context) =>
@@ -132,6 +148,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           value: 'subOption2',
                           child: Text(submenuName2),
                         ),
+                      // if (isSubmenu2Active && isMenu2Active || widget.isAdmin)
+                      PopupMenuItem<String>(
+                        value: 'subOption3',
+                        child: Text("pdf"),
+                      ),
                     ],
                     child: ListTile(
                       title: Text('admin'),
