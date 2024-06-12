@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pruebaresnet/screens/excel_screen.dart';
+import 'package:pruebaresnet/screens/email_screen.dart';
 import '../service/api_service.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -68,6 +69,15 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _navigateToEmailScreen(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EmailScreen(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -106,7 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           _navigateToDataTableScreen(context);
                           break;
                         case 'subOption2':
-                          print('Subopción 2 seleccionada');
+                          _navigateToEmailScreen(context);
                           break;
                       }
                     },
