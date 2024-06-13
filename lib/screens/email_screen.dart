@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import '../service/api_service.dart';
 
 class EmailScreen extends StatefulWidget {
   @override
@@ -8,29 +8,20 @@ class EmailScreen extends StatefulWidget {
 
 class _EmailScreenState extends State<EmailScreen> {
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _subjectController = TextEditingController();
-  final TextEditingController _bodyController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   Future<void> _sendEmail() async {
-    final String email = _emailController.text;
-    final String subject = _subjectController.text;
-    final String body = _bodyController.text;
-
-    final Uri emailUri = Uri(
-      scheme: 'mailto',
-      path: email,
-      queryParameters: {
-        'subject': subject,
-        'body': body,
-      },
-    );
-
-    if (await canLaunch(emailUri.toString())) {
-      await launch(emailUri.toString());
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No se pudo abrir el cliente de correo')),
-      );
+    if (_formKey.currentState!.validate()) {
+      try {
+        await ApiService.sendEmail(_emailController.text);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Correo enviado exitosamente')),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al enviar correo: $e')),
+        );
+      }
     }
   }
 
@@ -38,49 +29,33 @@ class _EmailScreenState extends State<EmailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Enviar Correo'),
+        title: Text('Enviar Correo de Recuperación'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: <Widget>[
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(
-                labelText: 'Correo Electrónico',
-                border: OutlineInputBorder(),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                controller: _emailController,
+                decoration: InputDecoration(labelText: 'Correo del Usuario'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor ingrese un correo';
+                  }
+                  return null;
+                },
               ),
-              keyboardType: TextInputType.emailAddress,
-            ),
-            SizedBox(height: 16),
-            TextField(
-              controller: _subjectController,
-              decoration: InputDecoration(
-                labelText: 'Asunto',
-                border: OutlineInputBorder(),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _sendEmail,
+                child: Text('Enviar Correo de Recuperación'),
               ),
-            ),
-            SizedBox(height: 16),
-            TextField(
-              controller: _bodyController,
-              decoration: InputDecoration(
-                labelText: 'Mensaje',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 5,
-            ),
-            SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _sendEmail,
-              child: Text('Enviar'),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
-
-void main() => runApp(MaterialApp(
-      home: EmailScreen(),
-    ));

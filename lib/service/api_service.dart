@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 /// [ApiService] es una clase que proporciona métodos estáticos para interactuar con una API backend.
 class ApiService {
   // URL base del servidor backend.
-  static const String baseUrl = 'http://192.168.79.4:3000';
+  static const String baseUrl = 'http://192.168.79.14:3000';
 
   /// Compara la contraseña del usuario con la almacenada en el servidor.
   ///
@@ -202,15 +202,14 @@ class ApiService {
     }
   }
 
-  static Future<void> sendEmail(
-      String email, String subject, String message) async {
+  static Future<void> sendEmail(String email) async {
     final response = await http.post(
       Uri.parse('$baseUrl/sendEmail'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'email': email,
-        'subject': subject,
-        'message': message,
+        'subject': 'Recuperación de contraseña',
+        'message': 'Este es su enlace para recuperar la contraseña.',
       }),
     );
 
