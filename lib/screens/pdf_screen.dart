@@ -7,21 +7,24 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:html' as html if (dart.library.io) 'dart:io';
 import '../service/api_service.dart';
 
+// Clase StatefulWidget para la pantalla de exportación a PDF
 class PdfExportScreen extends StatefulWidget {
   @override
   _PdfExportScreenState createState() => _PdfExportScreenState();
 }
 
+// Estado asociado con la pantalla de exportación a PDF
 class _PdfExportScreenState extends State<PdfExportScreen> {
-  List<Map<String, dynamic>> _data = [];
-  bool _isLoading = true;
+  List<Map<String, dynamic>> _data = []; // Datos de la tabla
+  bool _isLoading = true; // Indicador de carga
 
   @override
   void initState() {
     super.initState();
-    _fetchData();
+    _fetchData(); // Cargar datos al inicializar la pantalla
   }
 
+  // Función asincrónica para cargar los datos desde el servicio API
   Future<void> _fetchData() async {
     try {
       List<Map<String, dynamic>> data = await ApiService.fetchData();
@@ -39,6 +42,7 @@ class _PdfExportScreenState extends State<PdfExportScreen> {
     }
   }
 
+  // Función asincrónica para exportar los datos a un archivo PDF
   Future<void> _exportToPDF() async {
     try {
       final pdf = pw.Document();
@@ -50,6 +54,7 @@ class _PdfExportScreenState extends State<PdfExportScreen> {
           return headers.map((header) => row[header].toString()).toList();
         }).toList();
 
+        // Añadir página al documento PDF
         pdf.addPage(
           pw.Page(
             build: (pw.Context context) {
@@ -61,7 +66,7 @@ class _PdfExportScreenState extends State<PdfExportScreen> {
           ),
         );
 
-        // Guardar archivo
+        // Guardar archivo PDF
         if (kIsWeb) {
           // Guardar archivo en la web
           final bytes = await pdf.save();
@@ -72,7 +77,7 @@ class _PdfExportScreenState extends State<PdfExportScreen> {
             ..click();
           html.Url.revokeObjectUrl(url);
         } else {
-          // Guardar archivo en otras plataformas
+          // Guardar archivo en otras plataformas (como Android e iOS)
           Directory directory = await getApplicationDocumentsDirectory();
           String outputPath = '${directory.path}/output.pdf';
           File(outputPath)
@@ -96,22 +101,23 @@ class _PdfExportScreenState extends State<PdfExportScreen> {
     }
   }
 
+  // Método build para construir la interfaz de usuario
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Exportar Datos a PDF'),
+        title: Text('Exportar Datos a PDF'), // Título de la pantalla
         actions: [
           IconButton(
-            icon: Icon(Icons.download),
-            onPressed: _exportToPDF,
+            icon: Icon(Icons.download), // Icono para exportar a PDF
+            onPressed: _exportToPDF, // Acción al presionar el botón de exportar
           ),
         ],
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator()) // Indicador de carga
           : SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
+              scrollDirection: Axis.horizontal, // Desplazamiento horizontal para la tabla
               child: DataTable(
                 columns: _data.isNotEmpty
                     ? _data[0]

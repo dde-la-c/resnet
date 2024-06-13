@@ -6,21 +6,24 @@ import 'dart:html' as html if (dart.library.io) 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import '../service/api_service.dart';
 
+// Clase StatefulWidget para la pantalla de DataTable
 class DataTableScreen extends StatefulWidget {
   @override
   _DataTableScreenState createState() => _DataTableScreenState();
 }
 
+// Estado asociado con la pantalla de DataTable
 class _DataTableScreenState extends State<DataTableScreen> {
-  List<Map<String, dynamic>> _data = [];
-  bool _isLoading = true;
+  List<Map<String, dynamic>> _data = []; // Datos de la tabla
+  bool _isLoading = true; // Indicador de carga
 
   @override
   void initState() {
     super.initState();
-    _fetchData();
+    _fetchData(); // Cargar datos al inicializar la pantalla
   }
 
+  // Función asincrónica para cargar los datos desde el servicio API
   Future<void> _fetchData() async {
     try {
       List<Map<String, dynamic>> data = await ApiService.fetchData();
@@ -38,23 +41,24 @@ class _DataTableScreenState extends State<DataTableScreen> {
     }
   }
 
+  // Función asincrónica para exportar los datos a un archivo Excel
   Future<void> _exportToExcel() async {
     try {
       var excel = Excel.createExcel();
       Sheet sheetObject = excel['Sheet1'];
 
       if (_data.isNotEmpty) {
-        // Añadir encabezados de columnas
+        // Agregar encabezados de columnas
         List<String> headers = _data[0].keys.toList();
         sheetObject.appendRow(headers);
 
-        // Añadir datos
+        // Agregar datos de filas
         for (var row in _data) {
           List<dynamic> values = headers.map((header) => row[header]).toList();
           sheetObject.appendRow(values);
         }
 
-        // Guardar archivo
+        // Guardar archivo Excel
         if (kIsWeb) {
           // Guardar archivo en la web
           final bytes = excel.encode()!;
@@ -65,7 +69,7 @@ class _DataTableScreenState extends State<DataTableScreen> {
             ..click();
           html.Url.revokeObjectUrl(url);
         } else {
-          // Guardar archivo en otras plataformas
+          // Guardar archivo en otras plataformas (como Android e iOS)
           Directory directory = await getApplicationDocumentsDirectory();
           String outputPath = '${directory.path}/output.xlsx';
           File(outputPath)
@@ -89,22 +93,23 @@ class _DataTableScreenState extends State<DataTableScreen> {
     }
   }
 
+  // Método build para construir la interfaz de usuario
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Tabla de Datos'),
+        title: Text('Tabla de Datos'), // Título de la pantalla
         actions: [
           IconButton(
-            icon: Icon(Icons.download),
-            onPressed: _exportToExcel,
+            icon: Icon(Icons.download), // Icono para exportar a Excel
+            onPressed: _exportToExcel, // Acción al presionar el botón de exportar
           ),
         ],
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator()) // Indicador de carga
           : SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
+              scrollDirection: Axis.horizontal, // Desplazamiento horizontal para la tabla
               child: DataTable(
                 columns: _data.isNotEmpty
                     ? _data[0]
