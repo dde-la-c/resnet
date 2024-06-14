@@ -21,7 +21,7 @@ class _EmailScreenState extends State<EmailScreen> {
     if (_formKey.currentState!.validate()) {
       try {
         // Llama al servicio API para enviar el correo electrónico
-        await ApiService.sendEmail(_emailController.text);
+        await ApiService.sendEmail(_emailController.text, 1);
         // Muestra un mensaje de éxito en la interfaz de usuario
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Correo enviado exitosamente')),

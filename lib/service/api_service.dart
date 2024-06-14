@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 /// [ApiService] es una clase que proporciona métodos estáticos para interactuar con una API backend.
 class ApiService {
   // URL base del servidor backend.
-  static const String baseUrl = 'http://192.168.79.14:3000';
+  static const String baseUrl = 'http://192.168.79.11:3000';
 
   /// Compara la contraseña del usuario con la almacenada en el servidor.
   ///
@@ -202,19 +202,62 @@ class ApiService {
     }
   }
 
-  static Future<void> sendEmail(String email) async {
+  /// Envía un correo electrónico utilizando la API.
+  ///
+  /// [email]: Dirección de correo electrónico del destinatario.
+  /// [idCorreo]: ID del correo electrónico que determina el asunto y el contenido del correo.
+  ///
+  /// Throws an [Exception] if the HTTP request fails.
+  static Future<void> sendEmail(String email, int idCorreo) async {
     final response = await http.post(
       Uri.parse('$baseUrl/sendEmail'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'email': email,
-        'subject': 'Recuperación de contraseña',
-        'message': 'Este es su enlace para recuperar la contraseña.',
+        'subject': await getAsuntoMail(idCorreo),
+        'message': await getContenidoMail(idCorreo),
       }),
     );
 
     if (response.statusCode != 200) {
       throw Exception('Error al enviar correo: ${response.body}');
+    }
+  }
+
+  /// Obtiene el asunto de un correo electrónico específico desde la API.
+  ///
+  /// [idCorreo]: ID del correo electrónico del cual se desea obtener el asunto.
+  ///
+  /// Returns the [String] asunto del correo electrónico if successful, otherwise [null].
+  ///
+  /// Throws an [Exception] if the HTTP request fails.
+  static Future<String?> getAsuntoMail(int idCorreo) async {
+    final response = await http.get(Uri.parse('$baseUrl/asuntoMail/$idCorreo'));
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['asunto'];
+    } else {
+      throw Exception('Error al obtener el nombre del submenú');
+    }
+  }
+
+  /// Obtiene el contenido de un correo electrónico específico desde la API.
+  ///
+  /// [idCorreo]: ID del correo electrónico del cual se desea obtener el contenido.
+  ///
+  /// Returns the [String] contenido del correo electrónico if successful, otherwise [null].
+  ///
+  /// Throws an [Exception] if the HTTP request fails.
+  static Future<String?> getContenidoMail(int idCorreo) async {
+    final response =
+        await http.get(Uri.parse('$baseUrl/contenidoMail/$idCorreo'));
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['contenido'];
+    } else {
+      throw Exception('Error al obtener el nombre del submenú');
     }
   }
 }

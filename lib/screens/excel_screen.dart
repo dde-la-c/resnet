@@ -3,27 +3,25 @@ import 'package:path_provider/path_provider.dart';
 import 'package:excel/excel.dart';
 import 'dart:io';
 import 'dart:html' as html if (dart.library.io) 'dart:io';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show Uint8List, kIsWeb;
 import '../service/api_service.dart';
 
-// Clase StatefulWidget para la pantalla de DataTable
-class DataTableScreen extends StatefulWidget {
+class ExcelExportScreen extends StatefulWidget {
   @override
-  _DataTableScreenState createState() => _DataTableScreenState();
+  _ExcelExportScreenState createState() => _ExcelExportScreenState();
 }
 
-// Estado asociado con la pantalla de DataTable
-class _DataTableScreenState extends State<DataTableScreen> {
-  List<Map<String, dynamic>> _data = []; // Datos de la tabla
-  bool _isLoading = true; // Indicador de carga
+class _ExcelExportScreenState extends State<ExcelExportScreen> {
+  List<Map<String, dynamic>> _data = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _fetchData(); // Cargar datos al inicializar la pantalla
+    _fetchData();
   }
 
-  // Función asincrónica para cargar los datos desde el servicio API
+
   Future<void> _fetchData() async {
     try {
       List<Map<String, dynamic>> data = await ApiService.fetchData();
@@ -62,7 +60,9 @@ class _DataTableScreenState extends State<DataTableScreen> {
         if (kIsWeb) {
           // Guardar archivo en la web
           final bytes = excel.encode()!;
-          final blob = html.Blob([bytes], 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+          final blob = html.Blob([
+            bytes
+          ], 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
           final url = html.Url.createObjectUrlFromBlob(blob);
           final anchor = html.AnchorElement(href: url)
             ..setAttribute('download', 'output.xlsx')
@@ -92,7 +92,6 @@ class _DataTableScreenState extends State<DataTableScreen> {
       );
     }
   }
-
   // Método build para construir la interfaz de usuario
   @override
   Widget build(BuildContext context) {

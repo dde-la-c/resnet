@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:pruebaresnet/screens/excel_screen.dart';
 import 'package:pruebaresnet/screens/email_screen.dart';
 import 'package:pruebaresnet/screens/pdf_screen.dart';
+import 'package:pruebaresnet/screens/excel_screen.dart';
 import '../service/api_service.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -65,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => DataTableScreen(),
+        builder: (context) => ExcelExportScreen(),
       ),
     );
   }
@@ -148,7 +148,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           value: 'subOption2',
                           child: Text(submenuName2),
                         ),
-                      // if (isSubmenu2Active && isMenu2Active || widget.isAdmin)
                       PopupMenuItem<String>(
                         value: 'subOption3',
                         child: Text("pdf"),

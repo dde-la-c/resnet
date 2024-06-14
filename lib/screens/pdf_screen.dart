@@ -7,24 +7,21 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:html' as html if (dart.library.io) 'dart:io';
 import '../service/api_service.dart';
 
-// Clase StatefulWidget para la pantalla de exportación a PDF
 class PdfExportScreen extends StatefulWidget {
   @override
   _PdfExportScreenState createState() => _PdfExportScreenState();
 }
 
-// Estado asociado con la pantalla de exportación a PDF
 class _PdfExportScreenState extends State<PdfExportScreen> {
-  List<Map<String, dynamic>> _data = []; // Datos de la tabla
-  bool _isLoading = true; // Indicador de carga
+  List<Map<String, dynamic>> _data = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _fetchData(); // Cargar datos al inicializar la pantalla
+    _fetchData();
   }
 
-  // Función asincrónica para cargar los datos desde el servicio API
   Future<void> _fetchData() async {
     try {
       List<Map<String, dynamic>> data = await ApiService.fetchData();
@@ -42,19 +39,15 @@ class _PdfExportScreenState extends State<PdfExportScreen> {
     }
   }
 
-  // Función asincrónica para exportar los datos a un archivo PDF
   Future<void> _exportToPDF() async {
     try {
       final pdf = pw.Document();
       if (_data.isNotEmpty) {
-        // Añadir encabezados de columnas
         List<String> headers = _data[0].keys.toList();
-        // Añadir datos
         List<List<String>> data = _data.map((row) {
           return headers.map((header) => row[header].toString()).toList();
         }).toList();
 
-        // Añadir página al documento PDF
         pdf.addPage(
           pw.Page(
             build: (pw.Context context) {
@@ -66,27 +59,10 @@ class _PdfExportScreenState extends State<PdfExportScreen> {
           ),
         );
 
-        // Guardar archivo PDF
         if (kIsWeb) {
-          // Guardar archivo en la web
-          final bytes = await pdf.save();
-          final blob = html.Blob([bytes], 'application/pdf');
-          final url = html.Url.createObjectUrlFromBlob(blob);
-          final anchor = html.AnchorElement(href: url)
-            ..setAttribute('download', 'output.pdf')
-            ..click();
-          html.Url.revokeObjectUrl(url);
+          await exportToPDFWeb(pdf);
         } else {
-          // Guardar archivo en otras plataformas (como Android e iOS)
-          Directory directory = await getApplicationDocumentsDirectory();
-          String outputPath = '${directory.path}/output.pdf';
-          File(outputPath)
-            ..createSync(recursive: true)
-            ..writeAsBytesSync(await pdf.save());
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Archivo PDF guardado en $outputPath')),
-          );
+          await exportToPDFMobile(pdf);
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -101,23 +77,44 @@ class _PdfExportScreenState extends State<PdfExportScreen> {
     }
   }
 
-  // Método build para construir la interfaz de usuario
+  Future<void> exportToPDFWeb(pw.Document pdf) async {
+    final bytes = await pdf.save();
+    final blob = html.Blob([bytes], 'application/pdf');
+    final url = html.Url.createObjectUrlFromBlob(blob);
+    final anchor = html.AnchorElement(href: url)
+      ..setAttribute('download', 'output.pdf')
+      ..click();
+    html.Url.revokeObjectUrl(url);
+  }
+
+  Future<void> exportToPDFMobile(pw.Document pdf) async {
+    Directory directory = await getApplicationDocumentsDirectory();
+    String outputPath = '${directory.path}/output.pdf';
+    File(outputPath)
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(await pdf.save());
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Archivo PDF guardado en $outputPath')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Exportar Datos a PDF'), // Título de la pantalla
+        title: Text('Exportar Datos a PDF'),
         actions: [
           IconButton(
-            icon: Icon(Icons.download), // Icono para exportar a PDF
-            onPressed: _exportToPDF, // Acción al presionar el botón de exportar
+            icon: Icon(Icons.download),
+            onPressed: _exportToPDF,
           ),
         ],
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator()) // Indicador de carga
+          ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              scrollDirection: Axis.horizontal, // Desplazamiento horizontal para la tabla
+              scrollDirection: Axis.horizontal,
               child: DataTable(
                 columns: _data.isNotEmpty
                     ? _data[0]
